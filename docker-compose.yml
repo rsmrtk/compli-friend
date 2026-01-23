@@ -1,8 +1,7 @@
 services:
   bot:
     image: martun5/comply-friend:v1.0.0
-    build:
-      context: .
+    pull_policy: always
     env_file:
       - .env
     environment:
