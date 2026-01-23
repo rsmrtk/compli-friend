@@ -1,0 +1,10 @@
+services:
+  bot:
+    image: martun5/comply-friend:v1.0.0
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+    restart: unless-stopped
