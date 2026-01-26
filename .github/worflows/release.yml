@@ -1,0 +1,10 @@
+name: Kid CI
+on:
+  push:
+    branches: [ main, staging, sandbox, uat, master ]
+job:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "HELLO CI"
+  lint:
