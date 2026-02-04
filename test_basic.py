@@ -1,6 +1,5 @@
 # test_basic.py
 """Basic tests for CompliFriend bot"""
-import pytest
 from predictions import (
     MOTIVATION,
     PREDICTIONS,
