@@ -100,4 +100,3 @@ def get_random_message(messages):
 
 # Використання:
 prediction = get_random_message(PREDICTIONS + MOTIVATION)
-
