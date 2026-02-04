@@ -5,10 +5,12 @@ from dotenv import load_dotenv
 from telebot import types
 
 from predictions import MOTIVATION, PREDICTIONS, get_random_message
+
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 
 bot = telebot.TeleBot(TOKEN)
+
 
 # Створюємо головну клавіатуру
 def main_keyboard():
@@ -23,6 +25,7 @@ def main_keyboard():
     ]
     markup.add(*buttons)
     return markup
+
 
 @bot.message_handler(commands=['start'])
 @bot.message_handler(regexp="🔮 Старт")
@@ -47,6 +50,7 @@ def hello_message(message):
         reply_markup=main_keyboard()
     )
 
+
 @bot.message_handler(commands=['info'])
 @bot.message_handler(regexp="📜 Інфо")
 def info(message):
@@ -66,10 +70,12 @@ def info(message):
 2. Екстренні підказки /get
 3. Спеціальні побажання на події
 
-⚠️ <i>Важливо: Передбачення — це компас, а не карта. Ти завжди контролюєш свою долю!</i>""",
+⚠️ <i>Важливо: Передбачення — це компас, а не карта. Ти завжди
+контролюєш свою долю!</i>""",
         parse_mode='HTML',
         reply_markup=main_keyboard()
     )
+
 
 @bot.message_handler(commands=['help'])
 @bot.message_handler(regexp="🛠 Допомога")
@@ -92,6 +98,7 @@ def help(message):
         reply_markup=main_keyboard()
     )
 
+
 @bot.message_handler(commands=['about'])
 @bot.message_handler(regexp="🌀 Про бота")
 def restart(message):
@@ -106,12 +113,14 @@ def restart(message):
 3. <b>Розвиток</b> — кожен прогнес містить пораду для росту
 
 📜 <i>Історія створення:</i>
-Народився під час сонячного затемнення 2024, коли 3 розробники-містики вирішили поєднати Python та стародавні предикативні практики.
+Народився під час сонячного затемнення 2024, коли 3 розробники-містики
+вирішили поєднати Python та стародавні предикативні практики.
 
 «Найважливіші відповіді — у тобі. Ми лише допомагаємо їх почути»""",
         parse_mode='HTML',
         reply_markup=main_keyboard()
     )
+
 
 @bot.message_handler(commands=['get'])
 @bot.message_handler(regexp="✨ Отримати прогноз")
@@ -133,6 +142,7 @@ def get(message):
         reply_markup=main_keyboard()
     )
 
+
 @bot.message_handler(commands=['go'])
 @bot.message_handler(regexp="❤️ Готовий")
 def go(message):
@@ -142,5 +152,6 @@ def go(message):
         f"{prediction}",
         reply_markup=main_keyboard()
     )
+
 
 bot.polling(none_stop=True)

@@ -92,9 +92,12 @@ PREDICTIONS = [
     "🌤 Після дощу обов'язково з'являється твоя персональна веселка.",
 ]
 
+
 # В основному коді:
 def get_random_message(messages):
     return random.choice(messages)
 
+
 # Використання:
 prediction = get_random_message(PREDICTIONS + MOTIVATION)
+
