@@ -2,6 +2,7 @@ import os
 import threading
 import time
 from datetime import datetime
+import pytz
 
 import telebot
 from dotenv import load_dotenv
@@ -167,10 +168,11 @@ def go(message):
 
 # Функція для надсилання щоденних прогнозів
 def send_daily_predictions():
-    """Відправляє щоденні прогнози о 09:09"""
+    """Відправляє щоденні прогнози о 09:09 за київським часом"""
+    kyiv_tz = pytz.timezone('Europe/Kiev')
     while True:
-        now = datetime.now()
-        # Перевіряємо чи зараз 09:09
+        now = datetime.now(kyiv_tz)
+        # Перевіряємо чи зараз 09:09 за київським часом
         if now.hour == 9 and now.minute == 9:
             prediction = get_random_message(PREDICTIONS + MOTIVATION)
             greeting_text = """🌅 <b>Доброго ранку!</b> 🌅
