@@ -1,14 +1,23 @@
 import os
+import threading
+import time
+from datetime import datetime
+import pytz
 
 import telebot
 from dotenv import load_dotenv
 from telebot import types
 
 from predictions import MOTIVATION, PREDICTIONS, get_random_message
+
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 
 bot = telebot.TeleBot(TOKEN)
+
+# Список користувачів для щоденних прогнозів
+daily_users = set()
+
 
 # Створюємо головну клавіатуру
 def main_keyboard():
@@ -19,14 +28,17 @@ def main_keyboard():
         "🛠 Допомога",
         "🌀 Про бота",
         "✨ Отримати прогноз",
-        "❤️ Готовий"
+        "🌟 Готовий"
     ]
     markup.add(*buttons)
     return markup
 
+
 @bot.message_handler(commands=['start'])
 @bot.message_handler(regexp="🔮 Старт")
 def hello_message(message):
+    # Додаємо користувача до списку для щоденних прогнозів
+    daily_users.add(message.chat.id)
     bot.send_message(
         message.chat.id,
         f"""✨ <b>Вітаю, {message.from_user.first_name}!</b> ✨
@@ -42,10 +54,14 @@ def hello_message(message):
 → Задай питання у думках
 → Дозволь магії статись!
 
-<code>Наповнений зірковим пилом, створений у 2024 році.</code>""",
+🌅 <b>Щоденні прогнози:</b>
+Кожного дня о 09:09 ти отримуватимеш магічне передбачення!
+
+<code>Наповнений зірковим пилом</code>""",
         parse_mode='HTML',
         reply_markup=main_keyboard()
     )
+
 
 @bot.message_handler(commands=['info'])
 @bot.message_handler(regexp="📜 Інфо")
@@ -62,14 +78,16 @@ def info(message):
 
 📅 <b>Персональний графік:</b>
 Ти можеш отримувати:
-1. Щоденний прогноз (о 07:00)
+1. Щоденний прогноз (о 09:09)
 2. Екстренні підказки /get
 3. Спеціальні побажання на події
 
-⚠️ <i>Важливо: Передбачення — це компас, а не карта. Ти завжди контролюєш свою долю!</i>""",
+⚠️ <i>Важливо: Передбачення — це компас, а не карта. Ти завжди
+контролюєш свою долю!</i>""",
         parse_mode='HTML',
         reply_markup=main_keyboard()
     )
+
 
 @bot.message_handler(commands=['help'])
 @bot.message_handler(regexp="🛠 Допомога")
@@ -92,6 +110,7 @@ def help(message):
         reply_markup=main_keyboard()
     )
 
+
 @bot.message_handler(commands=['about'])
 @bot.message_handler(regexp="🌀 Про бота")
 def restart(message):
@@ -106,12 +125,14 @@ def restart(message):
 3. <b>Розвиток</b> — кожен прогнес містить пораду для росту
 
 📜 <i>Історія створення:</i>
-Народився під час сонячного затемнення 2024, коли 3 розробники-містики вирішили поєднати Python та стародавні предикативні практики.
+Народився під час сонячного затемнення 2024, коли 3 розробники-містики
+вирішили поєднати Python та стародавні предикативні практики.
 
 «Найважливіші відповіді — у тобі. Ми лише допомагаємо їх почути»""",
         parse_mode='HTML',
         reply_markup=main_keyboard()
     )
+
 
 @bot.message_handler(commands=['get'])
 @bot.message_handler(regexp="✨ Отримати прогноз")
@@ -125,7 +146,7 @@ def get(message):
 <i>Тривалість ритуалу: 5-7 секунд...</i>
 
 🌙 <b>Ти готовий?</b>
-→ /go — відправ ❤️
+→ Натисни "🌟 Готовий"
 → /info — краще повернуся пізніше (бот памʼятатиме стан)
 
 <code>P.S. Чим конкретніше запит — тим точніше передбачення!</code>""",
@@ -133,8 +154,9 @@ def get(message):
         reply_markup=main_keyboard()
     )
 
+
 @bot.message_handler(commands=['go'])
-@bot.message_handler(regexp="❤️ Готовий")
+@bot.message_handler(regexp="🌟 Готовий")
 def go(message):
     prediction = get_random_message(PREDICTIONS + MOTIVATION)
     bot.send_message(
@@ -142,5 +164,54 @@ def go(message):
         f"{prediction}",
         reply_markup=main_keyboard()
     )
+
+
+# Функція для надсилання щоденних прогнозів
+def send_daily_predictions():
+    """Відправляє щоденні прогнози о 09:09 за київським часом"""
+    kyiv_tz = pytz.timezone('Europe/Kiev')
+    while True:
+        now = datetime.now(kyiv_tz)
+        # Перевіряємо чи зараз 09:09 за київським часом
+        if now.hour == 9 and now.minute == 9:
+            greeting_text = """🌅 <b>Доброго ранку!</b> 🌅
+
+<i>Нехай цей день буде наповнений магією!</i> ✨"""
+
+            # Відправляємо всім користувачам
+            for user_id in list(daily_users):
+                try:
+                    # Генеруємо УНІКАЛЬНЕ передбачення для кожного користувача
+                    prediction = get_random_message(PREDICTIONS + MOTIVATION)
+
+                    # Спочатку привітання
+                    bot.send_message(
+                        user_id,
+                        greeting_text,
+                        parse_mode='HTML'
+                    )
+                    # Потім саме передбачення
+                    time.sleep(1)  # Невелика затримка між повідомленнями
+                    bot.send_message(
+                        user_id,
+                        prediction,
+                        reply_markup=main_keyboard()
+                    )
+                except Exception as e:
+                    print(f"Помилка відправки користувачу {user_id}: {e}")
+                    # Видаляємо користувача якщо бот заблокований
+                    if "blocked" in str(e).lower():
+                        daily_users.discard(user_id)
+
+            # Чекаємо 60 секунд щоб не відправити повідомлення двічі
+            time.sleep(60)
+        else:
+            # Перевіряємо кожні 30 секунд
+            time.sleep(30)
+
+
+# Запускаємо щоденні прогнози в окремому потоці
+daily_thread = threading.Thread(target=send_daily_predictions, daemon=True)
+daily_thread.start()
 
 bot.polling(none_stop=True)

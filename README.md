@@ -32,3 +32,24 @@ Python: Backend programming language.
 Telegram Bot API: For interacting with Telegram.
 python-telegram-bot: Python library for working with the Telegram Bot API.
 (add other technologies if used)
+
+Docker / Deploy
+1) Підготувати env
+- Скопіюй `.env.example` у `.env` та заповни `BOT_TOKEN`.
+- За потреби задай `REGISTRY_IMAGE=registry.example.com/namespace/compli-friend:latest`, щоб build/push йшов у твій registry.
+
+2) Зібрати й запустити локально через Compose
+- `docker compose build bot`
+- `docker compose up -d bot`
+- Логи: `docker compose logs -f bot`
+
+3) Опублікувати в Docker Registry
+- `docker login <registry-host>`
+- `REGISTRY_IMAGE=<registry>/namespace/compli-friend:latest docker compose build bot`
+- `REGISTRY_IMAGE=<registry>/namespace/compli-friend:latest docker compose push bot`
+
+4) Деплой на Webdock (через docker compose)
+- Скопіюй на сервер `docker-compose.yml` і `.env` (без секретів у git).
+- На сервері: `REGISTRY_IMAGE=<registry>/namespace/compli-friend:latest docker compose pull bot`
+- Запуск: `docker compose up -d bot`
+- Оновлення: `docker compose pull bot && docker compose up -d bot`
