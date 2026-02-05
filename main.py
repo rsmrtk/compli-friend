@@ -174,7 +174,6 @@ def send_daily_predictions():
         now = datetime.now(kyiv_tz)
         # Перевіряємо чи зараз 09:09 за київським часом
         if now.hour == 9 and now.minute == 9:
-            prediction = get_random_message(PREDICTIONS + MOTIVATION)
             greeting_text = """🌅 <b>Доброго ранку!</b> 🌅
 
 <i>Нехай цей день буде наповнений магією!</i> ✨"""
@@ -182,6 +181,9 @@ def send_daily_predictions():
             # Відправляємо всім користувачам
             for user_id in list(daily_users):
                 try:
+                    # Генеруємо УНІКАЛЬНЕ передбачення для кожного користувача
+                    prediction = get_random_message(PREDICTIONS + MOTIVATION)
+
                     # Спочатку привітання
                     bot.send_message(
                         user_id,
