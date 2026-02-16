@@ -24,6 +24,9 @@ daily_users: set[int] = set()
 daily_users_lock = threading.Lock()
 
 
+CONFIRM_TEXT = "🗓 Тебе додано до щоденної розсилки (09:09)."
+
+
 def load_daily_users():
     """Ініціалізує список користувачів із файла (якщо він є)."""
     try:
@@ -72,6 +75,14 @@ def remove_daily_user(chat_id: int) -> bool:
     return removed
 
 
+def ensure_daily_user(chat_id: int, notify_if_new: bool = True) -> bool:
+    """Гарантує, що користувач у щоденній розсилці; опціонально надсилає підтвердження."""
+    is_new = add_daily_user(chat_id)
+    if is_new and notify_if_new:
+        bot.send_message(chat_id, CONFIRM_TEXT, reply_markup=main_keyboard())
+    return is_new
+
+
 load_daily_users()
 
 
@@ -116,7 +127,7 @@ def hello_message(message):
     if added:
         bot.send_message(
             message.chat.id,
-            "🗓 Тебе додано до щоденної розсилки (09:09).",
+            CONFIRM_TEXT,
             reply_markup=main_keyboard()
         )
 
@@ -130,6 +141,15 @@ def go(message):
         f"{prediction}",
         reply_markup=main_keyboard()
     )
+
+
+@bot.message_handler(func=lambda message: True, content_types=['text'])
+def auto_register_daily(message):
+    """
+    Автододає користувача до щоденної розсилки при першому текстовому повідомленні.
+    Підтвердження надсилається лише один раз під час фактичного додавання.
+    """
+    ensure_daily_user(message.chat.id, notify_if_new=True)
 
 
 # Функція для надсилання щоденних прогнозів
